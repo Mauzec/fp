@@ -1,165 +1,181 @@
-from Processing import *
-
-import curses
+import os
+import cv2
+import numpy as np
+import threading
+from tkinter import ttk
+import tkinter as tk
+from tkinter.messagebox import showerror, showinfo
 import time
 
-currentMenu = "main" # main menu
+directory_input = ''
+directory_output = ''
+include_parametres = dict()
 
-settingsAccepted = set()
-settingsAccepted.add("Sharpen")
-settingsAccepted.add("Sepia")
+def is_error()->bool:
+    global directory_output, directory_input
+    if not directory_output or not directory_input:
+        showerror(title="ошибка", message= "введите названия директорий")
+        return 0
+    elif sum(include_parametres.values()) == 0:
+        showerror(title="ошибка", message="введите параметры")
+        return 0
+    elif not os.path.isdir(directory_input):
+         showerror(title="ошибка", message=f"директория {directory_input} не найдена")
+         return 0
+    return 1
+        
+def safe_parametres():
+    global directory_output, directory_input
+    
+    directory_input = Entry_input.get()
+    directory_output = Entry_output.get()
+    for line in include_column.keys():
+        include_parametres[line] = int(include_column[line].get())
+    
+    showinfo(title="успешный успех", message="данные сохранены")
+    
+def generation_checkbutton(array_name)->dict:
+    this_dict = dict()
+    for line in array_name:
+        this_dict[line] = tk.IntVar()
+    return this_dict
+# Функция для загрузки изображений из заданной директории
+def load_images(directory):
+    images = []
+    for filename in os.listdir(directory):
+        if filename.endswith(".jpg") or filename.endswith(".png"):
+            image_path = os.path.join(directory, filename)
+            image = cv2.imread(image_path)
+            images.append(image)
+    return images
 
-sizeAccepted = (0, 0, 0)
-tmp = ""
-userInput = "img"
-userOutput = "wow"
-enableInput = False
-enableOutput = False
+# Функция для разделения изображений на равные части
+def split_image(image, num_parts):
+    height, width, _ = image.shape
+    part_width = (width // num_parts) + 1
+    parts = []
+    for i in range(num_parts):
+        part = image[:, i * part_width:(i + 1) * part_width, :]
+        parts.append(part)
+    return parts
 
-enableSaving = False
+def process_image_part(k, image_part, filter_name, filtered_parts):
+    if filter_name == "SHARPEN":
+        kernel = np.array([[-1,-1,-1], [-1,9,-1], [-1,-1,-1]])
+        filtered_image_part = cv2.filter2D(image_part, -1, kernel)
+    elif filter_name == "BLUR":
+        filtered_image_part = cv2.GaussianBlur(image_part, (5, 5), 0)
+    elif filter_name == "DECREASE":
+        filtered_image_part = cv2.resize(image_part, None, fx=0.5, fy=0.5, interpolation = cv2.INTER_CUBIC)
+    filtered_parts[k] = filtered_image_part
 
+# Функция для сохранения обработанных изображений в новую директорию
+def save_images(filtered_images, directory):
+    name_file = os.listdir(directory_input)
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+    for i, image in enumerate(filtered_images):
+        filename = f"{name_file[i][:name_file[i].find('.')]}_new{name_file[i][name_file[i].find('.'):]}"
+        filepath = os.path.join(directory, filename)
+        cv2.imwrite(filepath, image)
 
-isQuit = False
-def menuView(stdscr):
-    # console settings
-    curses.curs_set(0) # no cursor
-    stdscr.nodelay(1)  # make getch() unblocked
-    global currentMenu
-    global settingsAccepted
-    global sizeAccepted
-    global tmp
-    global userInput
-    global userOutput
-    global enableInput
-    global enableOutput
-    global enableSaving
-    global isQuit
+# Основная функция программы
+def main():
+    # Загрузка изображений из заданной директории
+    if not is_error():
+        showerror(title= "прерывание", message= "операция прервана")
+        return
 
-    while True:
-        # getting keys
-        key = stdscr.getch()
-        if (not enableOutput) and (not enableInput) and (key == ord("q")):
-            isQuit = True
-            break
+    # Разделение изображений на равные части для обработки каждым фильтром
+    num_parts = 16
+    image_parts = []
+    for image in load_images(directory_input):
+        parts = split_image(image, num_parts)
+        image_parts.append(parts)
 
-        if currentMenu == "main":
-            if key == ord("1"):
-                currentMenu = "Settings"
-                stdscr.clear()
-            elif key == ord("2"):
-                currentMenu = "Save"
-                enableSaving = True
-                stdscr.clear()
-        elif currentMenu == "Resize":         
-            # resize menu
-            if key == ord("1"):
-                sizeAccepted = (800, 600, 1)
-            elif key == ord("2"):
-                sizeAccepted = (1280, 720, 2)
-            elif key == ord("3"):
-                sizeAccepted = (0, 0, 0)
-            elif key == ord("4"):
-                sizeAccepted = (4096, 4096, 4)
-
-            elif key == ord("z"):
-                currentMenu = "Settings"
-                stdscr.clear()
-        elif currentMenu != "main":
-            # getting user input/output if needed
-            if enableInput or enableOutput:
-                if key == 10:
-                    curses.noecho()
-                    if enableInput:
-                        userInput = tmp
-                        enableInput = False
-                    if enableOutput:
-                        userOutput = tmp
-                        enableOutput = False
-                    tmp = ""
-                    stdscr.clear()
-                elif key != -1:
-                    tmp += chr(key)
-                continue
-
-            if key == ord("z"):
-                currentMenu = "main"
-                stdscr.clear()
-
-            # Input user folder with images
-            if key == ord("1"):
-                curses.echo()
-                enableInput = True
-            elif key == ord("2"):
-                curses.echo()
-                enableOutput = True
-
-            # Enable filters if needed
-            elif key == ord("3"):
-                if "Sepia" in settingsAccepted:
-                    settingsAccepted.remove("Sepia")
-                else:
-                    settingsAccepted.add("Sepia")
-            elif key == ord("5"):
-                currentMenu = "Resize"
-                stdscr.clear()
-            elif key == ord("4"):
-                if "Sharpen" in settingsAccepted:
-                    settingsAccepted.remove("Sharpen")
-                else:
-                    settingsAccepted.add("Sharpen")
-                    
-        # Drawing current menu
-        if currentMenu == "main":
-            stdscr.addstr(0, 0, "1. Settings")
-            stdscr.addstr(1, 0, "2. Save")
-        elif currentMenu == "Resize":
-            if sizeAccepted[2] == 1:
-                stdscr.addstr(0, 0, "1. 800x600", curses.A_BOLD)
-            else:
-                stdscr.addstr(0, 0, "1. 800x600")
-            if sizeAccepted[2] == 2:
-                stdscr.addstr(1, 0, "2. 1280x720", curses.A_BOLD)
-            else:
-                stdscr.addstr(1, 0, "2. 1280x720")
-            if sizeAccepted[2] == 0:
-                stdscr.addstr(2, 0, "3. Do not change", curses.A_BOLD)
-            else:
-                stdscr.addstr(2, 0, "3. Do not change")
-            if sizeAccepted[2] == 4:
-                stdscr.addstr(3, 0, "4. 4096x4096", curses.A_BOLD)
-            else:
-                stdscr.addstr(3, 0, "4. 4096x4096")
-        elif currentMenu == "Settings":
-            stdscr.addstr(0, 0, f"1. Input folder: {userInput}")
-            stdscr.addstr(1, 0, f"2. Output folder: {userOutput}")
-            if "Sepia" in settingsAccepted:
-                stdscr.addstr(2, 0, "3. Sepia", curses.A_BOLD)
-            else:
-                stdscr.addstr(2, 0, "3. Sepia")
-            if "Sharpen" in settingsAccepted:
-                stdscr.addstr(3, 0, "4. Sharpen", curses.A_BOLD)
-            else:
-                stdscr.addstr(3, 0, "4. Sharpen")
-            stdscr.addstr(4, 0, "5. Resize")
-
-            if enableInput: 
-                stdscr.addstr(12, 0, f"Enter accurate input folder name")
-                stdscr.addstr(13, 3, tmp)
-            
-            if enableOutput:
-                stdscr.addstr(12, 0, f"Enter accurate output folder name")
-                stdscr.addstr(13, 3, tmp)
-
-        elif currentMenu == "Save": 
-            break
-        stdscr.refresh()
-
+    # Создание фильтров
+    filters = ["DECREASE", "SHARPEN", "BLUR"]
+    translate = {
+        "DECREASE": "Уменьшение",
+        "SHARPEN": "Резкость",
+        "BLUR": "Сглаживание"
+    }
+    for filter_name in filters:
+        if (not include_parametres[translate[filter_name]]):
+            continue
+        filtered_images = []
+        for parts in image_parts:
+            threads = []
+            filtered_parts = [0] * num_parts
+            for i in range(0, num_parts):
+                threads.append(threading.Thread(target=process_image_part, args=(i, parts[i], filter_name, filtered_parts)))
+            for i in range(0, num_parts):
+                threads[i].start()
+            for i in range(0, num_parts):
+                threads[i].join()
+            threads.clear()
+            filtered_images.append(filtered_parts.copy())
+        image_parts = filtered_images.copy()
+    filtered_images = []
+    for image in image_parts:
+            filtered_image = np.hstack(image)
+            filtered_images.append(filtered_image)    
+    save_images(filtered_images, directory_output)
+    showinfo(title="успешный успех", message="изображения обработаны")
+    
 if __name__ == "__main__":
-    curses.wrapper(menuView)
-    if not isQuit:
-        start = time.time()
-        processImages(userInput, userOutput, size=(sizeAccepted[0], sizeAccepted[1]), 
-                        sepia=("Sepia" in settingsAccepted),
-                        sharpened=("Sharpen" in settingsAccepted))
-        end = time.time()
-        print(f"TIME: {end - start} s")
+    root = tk.Tk()
+    root.title("параллельная обработка изображений")
+    
+    root['background'] = "gray"
+    root.resizable(False, False)
+    
+    my_font = ("Arial", 16) 
+    
+    style_frame = ttk.Style()
+    style_frame.configure("CustomFrame.TFrame", background="white")
+    style_way_frame = ttk.Style()
+    style_way_frame.configure("Style.TFrame", background="gray")
+    style_check_button = ttk.Style()
+    style_check_button.configure("TCheckbutton", font=my_font, background="white", foreground="gray")
+    style_button = ttk.Style()
+    style_button.configure("TButton", font=my_font)
+    style_label = ttk.Style()
+    style_label.configure("TLabel", font=my_font, padding=10, foreground="white", background="gray")
+    style_Entry = ttk.Style()
+    style_Entry.configure("TEntry", padding=5, font=my_font, foreground="black", background="gray")
+    
+    main_menu = tk.Menu()
+
+
+    obr = tk.Button(text="обработать изображения", command=main)
+    obr.pack()
+    sohr = tk.Button(text="сохранить параметры", command=safe_parametres)
+    sohr.pack()
+    
+    write_name_file = ttk.Frame(root, style="Style.TFrame")
+    write_name_file.pack()
+    parametres = ttk.Frame(root, style="CustomFrame.TFrame")
+    parametres.pack()
+    name_check_button = ["Уменьшение", "Резкость", "Сглаживание"]
+    include_column = generation_checkbutton(name_check_button)
+    Check_button = {}
+    filter_label = ttk.Label(parametres, style="TLabel", text="Выберите методы фильтрации")
+    filter_label.grid(row=0, column=0)
+    for line in name_check_button:
+        Check_button[line] = ttk.Checkbutton(parametres, text=line, style="TCheckbutton", variable=include_column[line])
+        Check_button[line].grid(sticky="w")
+        
+    label_in_out = ttk.Label(write_name_file, style="TLabel", text="Введите названия входных и выходных директорий")
+    label_in_out.grid(row=0, column=0, columnspan=2)
+    label_input = ttk.Label(write_name_file, style="TLabel", text="Директория ввода")
+    label_input.grid(row=1, column=0)
+    label_output = ttk.Label(write_name_file, style="TLabel", text="Директория вывода")
+    label_output.grid(row=1, column=1)
+    Entry_input = ttk.Entry(write_name_file, justify="center", width=30, style="TEntry")
+    Entry_output = ttk.Entry(write_name_file, justify="center", width=30, style="TEntry")
+    Entry_input.grid(row=2, column=0)
+    Entry_output.grid(row=2, column=1)
+  
+    root.config(menu=main_menu)
+    root.mainloop()
