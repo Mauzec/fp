@@ -1,0 +1,75 @@
+2023-12-04 18:02:16.368278 [435989789, victorkoloskov]: /weather ff ff
+2023-12-04 18:02:16.916627 [USER FAIL][435989789, victorkoloskov]: Command failed to bind arguments!
+2023-12-04 18:02:25.917638 [435989789, victorkoloskov]: /hey
+2023-12-04 18:02:36.936058 [435989789, victorkoloskov]: /currency gg gg
+2023-12-04 18:02:38.082468 [USER FAIL][435989789, victorkoloskov]:[SENT] 400 | Error. Might not valid currencies
+2023-12-04 18:02:49.922857 [435989789, victorkoloskov]: /currency USD gg
+2023-12-04 18:02:50.747087 [USER FAIL][435989789, victorkoloskov]:[SENT] 400 | Error. Might not valid currencies
+2023-12-04 18:03:04.475173 [435989789, victorkoloskov]: /currency USD GDP
+2023-12-04 18:03:05.980602 [USER FAIL][435989789, victorkoloskov]:[SENT] 400 | Error. Might not valid currencies
+2023-12-04 18:03:14.788369 [435989789, victorkoloskov]: /currency USD GBP
+2023-12-04 18:03:16.228033 [435989789, victorkoloskov]:[SENT] USD: 0.7864701119 GBP
+2023-12-04 18:03:25.269615 [435989789, victorkoloskov]: /currency USD RUB
+2023-12-04 18:03:26.379084 [435989789, victorkoloskov]:[SENT] USD: 90.5167200731 RUB
+2023-12-04 18:08:53.818302 [435989789, victorkoloskov]: /currency BTC RUB
+2023-12-04 18:08:54.848609 [USER FAIL][435989789, victorkoloskov]:[SENT] 400 | Error. Might not valid currencies
+2023-12-04 18:08:59.039555 [435989789, victorkoloskov]: /currency USD RUB
+2023-12-04 18:08:59.924846 [435989789, victorkoloskov]:[SENT] USD: 90.5167200731 RUB
+2023-12-04 23:22:45.196191 [435989789, victorkoloskov]: hey
+2023-12-04 23:23:41.175304 [435989789, victorkoloskov]: /currency SGD RUB
+2023-12-04 23:23:42.016697 [435989789, victorkoloskov]:[SENT] SGD: 67.9417121051 RUB
+2023-12-06 13:14:17.682566 [435989789, victorkoloskov]: /currency
+2023-12-06 13:14:18.128960 [USER FAIL][435989789, victorkoloskov]: Command failed to bind arguments!
+2023-12-06 13:14:18.129928 [435989789, victorkoloskov]: /weather
+2023-12-06 13:14:18.345821 [USER FAIL][435989789, victorkoloskov]: Command failed to bind arguments!
+2023-12-06 13:14:18.346043 [435989789, victorkoloskov]: /currency
+2023-12-06 13:14:18.576934 [USER FAIL][435989789, victorkoloskov]: Command failed to bind arguments!
+2023-12-06 13:14:18.577151 [435989789, victorkoloskov]: /weather
+2023-12-06 13:14:18.852330 [USER FAIL][435989789, victorkoloskov]: Command failed to bind arguments!
+2023-12-06 13:14:18.853010 [807848438, Animeshka1784]: /start
+2023-12-06 13:14:18.853196 [807848438, Animeshka1784]: /weather
+2023-12-06 13:14:19.105706 [USER FAIL][807848438, Animeshka1784]: Command failed to bind arguments!
+2023-12-06 13:14:19.105924 [807848438, Animeshka1784]: /weather Mosckow
+2023-12-06 13:14:19.889863 [USER FAIL][807848438, Animeshka1784]:[SENT] 400 | Error. Might no matching location found.
+2023-12-06 13:14:19.890206 [807848438, Animeshka1784]: /weather
+2023-12-06 13:14:20.142263 [USER FAIL][807848438, Animeshka1784]: Command failed to bind arguments!
+2023-12-06 13:15:01.683738 [807848438, Animeshka1784]: ты пидор
+2023-12-06 13:15:08.816682 [807848438, Animeshka1784]: /weather
+2023-12-06 13:16:07.773200 [807848438, Animeshka1784]: /weather Moscow
+2023-12-06 13:16:08.286793 [807848438, Animeshka1784]:[SENT] -11.0
+2023-12-06 13:16:20.019693 [807848438, Animeshka1784]: /currency USD RUB
+2023-12-06 13:16:20.637451 [807848438, Animeshka1784]:[SENT] USD: 90.2279315812 RUB
+2023-12-06 13:16:27.939278 [435989789, victorkoloskov]: /currency USD RUB
+2023-12-06 13:16:28.447977 [435989789, victorkoloskov]:[SENT] USD: 90.2279315812 RUB
+2023-12-06 13:16:58.710241 [807848438, Animeshka1784]: /search HELLO
+2023-12-06 13:16:58.971869 [807848438, Animeshka1784]:[SENT] HELLO
+2023-12-06 13:17:32.197226 [807848438, Animeshka1784]: /search HELLO
+2023-12-06 13:17:32.427602 [807848438, Animeshka1784]:[SENT] https://www.google.com/search?q=HELLO
+2023-12-06 13:17:46.609368 [807848438, Animeshka1784]: /search HELLO
+2023-12-06 13:17:51.860000 [ERROR][807848438, Animeshka1784]:[SENT] Error
+2023-12-06 13:32:49.166356 [807848438, Animeshka1784]: /search HELLO
+2023-12-06 13:32:49.493905 [807848438, Animeshka1784]:[SENT] https://www.google.com/search?q=HELLO
+2023-12-06 13:33:11.528190 [435989789, victorkoloskov]: /search HELLO
+2023-12-06 13:33:11.766787 [435989789, victorkoloskov]:[SENT] https://www.google.com/search?q=HELLO
+2023-12-06 13:33:14.741468 [435989789, victorkoloskov]: /search HEY
+2023-12-06 13:33:14.994072 [435989789, victorkoloskov]:[SENT] https://www.google.com/search?q=HEY
+2023-12-06 13:34:00.090179 [435989789, victorkoloskov]: /search Where's the Amazon located?
+2023-12-06 13:34:00.316323 [435989789, victorkoloskov]:[SENT] https://www.google.com/search?q= Where's the Amazon located?
+2023-12-06 13:34:08.904035 [435989789, victorkoloskov]: /search Where's the Amazon located?
+2023-12-06 13:34:09.349291 [435989789, victorkoloskov]:[SENT] https://www.google.com/search?q= Where's the Amazon located?
+2023-12-06 13:34:14.513545 [435989789, victorkoloskov]: /search Wheres the Amazon located?
+2023-12-06 13:34:14.795664 [435989789, victorkoloskov]:[SENT] https://www.google.com/search?q=Wheres the Amazon located?
+2023-12-06 13:34:22.255069 [435989789, victorkoloskov]: /search hey
+2023-12-06 13:34:22.551371 [435989789, victorkoloskov]:[SENT] https://www.google.com/search?q=hey
+2023-12-06 13:35:04.805869 [435989789, victorkoloskov]: /search hey hey
+2023-12-06 13:35:05.178972 [435989789, victorkoloskov]:[SENT] https://www.google.com/search?q=hey+hey
+2023-12-06 13:35:21.923997 [435989789, victorkoloskov]: /search Where's the Amazon located?
+2023-12-06 13:35:22.150402 [435989789, victorkoloskov]:[SENT] https://www.google.com/search?q= Where's the Amazon located?
+2023-12-06 13:35:38.122910 [435989789, victorkoloskov]: /search Wheres the Amazon located?
+2023-12-06 13:35:38.385060 [435989789, victorkoloskov]:[SENT] https://www.google.com/search?q=Wheres+the+Amazon+located?
+2023-12-06 13:36:01.731967 [435989789, victorkoloskov]: thx
+2023-12-06 13:36:29.193485 [435989789, victorkoloskov]: /weather Moscow
+2023-12-06 13:36:30.019684 [435989789, victorkoloskov]:[SENT] -11.0
+2023-12-06 13:37:38.290531 [435989789, victorkoloskov]: /currency USD RUB
+2023-12-06 13:37:39.084370 [435989789, victorkoloskov]:[SENT] USD: 90.2279315812 RUB
+2023-12-06 13:37:48.293181 [435989789, victorkoloskov]: thats true, thx

@@ -1,11 +1,11 @@
 import asyncio
-import aioconsole
-from tkinter import ttk
 import tkinter as tk
+
+from tkinter import filedialog
 
 class client:
     def __init__(self) -> None:
-        self.designer = ''
+        self.gui = ''
         self.user =''
 
         self.host = 'localhost'
@@ -15,17 +15,36 @@ class client:
         self.writer = ''
         
     async def error(self, message):
+        '''
+        Used to print error messages
+        '''
         print(f"error: {message}")
         
     async def receive_message(self): 
+        '''
+        Continuously read message from the server & displays them
+        '''
         while True:
-            message = await self.reader.read(1024)  # Получаем сообщение от сервера
-            print(f"{message.decode().strip()}")
-            await self.designer.receive_message(message.decode().strip())  
-            if "Connection lost" in message.decode().strip():
+            message = await self.reader.read(4096)
+            message = message.decode().strip()
+
+            tmp = message.find('<FILE>') 
+            if tmp >= 0:
+                message = message[tmp:].split('<FILE>')
+                with open(f'/Users/maus/hello/{message[1]}', 'wb') as f:
+                    f.write(message[1])
+                continue
+
+
+            print(f"{message}")
+            await self.gui.receive_message(message)  
+            if "Connection lost" in message:
                 return
             
     async def send_message(self, message):
+        '''
+        Send a message to the server
+        '''
         if message == "": 
             self.error("No entries")
             return
@@ -33,20 +52,33 @@ class client:
         await self.writer.drain()
         if message == "exit":
             return
-    
-    async def send_message_to_server(self, writer, message):
-        writer.write(message.encode())
-        await writer.drain()
            
     async def start_client(self) -> None:
+        '''
+        Sets up the client
+        '''
         self.reader, self.writer = await asyncio.open_connection(self.host, self.port)
-        print("Подключено к серверу")
+        print("")
         
         await self.receive_message()
         self.writer.close()
+
+    async def send_image(self, imagepath: str) -> None:
+        '''
+        Send a image to the server
+        '''
+        with open(imagepath, 'rb') as image_file:
+            image_data = image_file.read()
+            image_size = len(image_data)
+
+            # send the image size first
+            self.writer.write(f'<FILE>{image_size}<FILE>{image_data}'.encode())
+            await self.writer.drain()
         
-class designer:
+class Gui:
     def __init__(self, client):
+        self.imagepath = None
+
         self.client = client
         
         self.root = tk.Tk()
@@ -63,32 +95,43 @@ class designer:
         self.text_entry = tk.Entry(self.root)
         self.text_entry.pack(side="left", fill="x",expand=True)
 
-        self.send_button = tk.Button(self.root, text="Send", command=self.click)
-        self.send_button.pack()
-        
-        self.history = list()
-        
-        
+        self.send_button = tk.Button(self.root, text="Send", command=self.button_click)
+        self.send_button.pack(side='left', fill='x', expand=True)
+
+        self.image_button = tk.Button(self.root, text='Browse', command=self.select_image)
+        self.image_button.pack(side='left', fill='x', expand=True)
+           
+    def select_image(self):
+        self.imagepath = filedialog.askopenfilename()
+        self.text_entry.delete(0, 'end')
+        self.text_entry.insert(0, self.imagepath)
+
     async def update(self, interval = 0.05):
         while True:
             self.root.update()
             await asyncio.sleep(interval)
-    def click(self):
+
+    def button_click(self):
         asyncio.create_task(self.send_message())
         
     async def send_message(self):
-        message = self.text_entry.get()
-        await self.client.send_message(message)
+        if self.imagepath != None:
+            tmp = self.imagepath
+            self.imagepath = None
+            await self.client.send_image(tmp)
+            
+        else:
+            message = self.text_entry.get()
+            await self.client.send_message(message)
         
-    async def receive_message(self, message):
+    async def receive_message(self, message: str):
         self.text_widget.insert("end", message + '\n')
-        self.history.append(message)
         self.text_entry.delete(0, "end")
  
 async def main():
     my_client = client()
-    my_des = designer(my_client)
-    my_client.designer = my_des
+    my_des = Gui(my_client)
+    my_client.gui = my_des
     tasks = [
         asyncio.create_task(my_client.start_client()),
         asyncio.create_task(my_des.update())
